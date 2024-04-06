@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPDUAI - IP, Device, and User Agent Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #info {
+            margin-top: 20px;
+        }
+
+        #info p {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        #show-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #show-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IPDUAI - IP, Device, and User Agent Information</h1>
+        <button id="show-button">Show Information</button>
+        <div id="info"></div>
+    </div>
+
+    <script>
+        async function fetchInfo() {
+            try {
+                let myIPResponse = await fetch("https://wtfismyip.com/json");
+                if (!myIPResponse.ok) {
+                    throw new Error("Failed to fetch IP address");
+                }
+                let myIPData = await myIPResponse.json();
+                let ipAddress = myIPData.YourFuckingIPAddress;
+
+                let ipDataResponse = await fetch(`https://uncors.vercel.app/?url=http://ip-api.com/json/${ipAddress}`);
+                if (!ipDataResponse.ok) {
+                    throw new Error("Failed to fetch IP data");
+                }
+                let ipData = await ipDataResponse.json();
+
+                return {
+                    myIPData,
+                    ipData,
+                    userAgent: navigator.userAgent,
+                    connectionMethod: navigator.connection ? navigator.connection.type : 'Unknown',
+                    requestURL: window.location.href,
+                    requestPath: window.location.pathname,
+                    requestProtocol: window.location.protocol.replace(':', ''),
+                    secureConnection: window.location.protocol === 'https:' ? 'Yes' : 'No',
+                    proxyIPs: [],
+                    windowProperties: window.screen.availWidth,
+                    windowWidth: window.innerWidth + 'px',
+                    windowHeight: window.innerHeight + 'px',
+                    windowRatio: window.innerWidth / window.innerHeight,
+                    screenWidth: window.screen.width + 'px',
+                    screenHeight: window.screen.height + 'px',
+                    screenRatio: window.screen.width / window.screen.height,
+                    screenPixelRatio: window.devicePixelRatio,
+                    screenDPI: window.screen.pixelDepth,
+                    screenColorDepth: window.screen.colorDepth,
+                    screenOrientation: window.screen.orientation.type,
+                    screenRotation: window.screen.orientation.angle,
+                    os: navigator.platform,
+                    availableBrowserMemory: navigator.deviceMemory ? navigator.deviceMemory + 'MB' : 'Unknown',
+                    cpuThreads: navigator.hardwareConcurrency || 'Unknown',
+                    gpuVendor: navigator.gpu ? navigator.gpu.vendor : 'Unknown',
+                    gpuInfo: navigator.gpu ? navigator.gpu.renderer : 'Unknown',
+                    deviceMemory: navigator.deviceMemory || 'Unknown',
+                    systemLanguages: navigator.languages.join(', ')
+                };
+            } catch (error) {
+                console.error("Error fetching information:", error);
+                return null;
+            }
+        }
+
+        async function displayInfo() {
+            const infoContainer = document.getElementById('info');
+            infoContainer.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const {
+                    myIPData,
+                    ipData,
+                    userAgent,
+                    connectionMethod,
+                    requestURL,
+                    requestPath,
+                    requestProtocol,
+                    secureConnection,
+                    proxyIPs,
+                    windowProperties,
+                    windowWidth,
+                    windowHeight,
+                    windowRatio,
+                    screenWidth,
+                    screenHeight,
+                    screenRatio,
+                    screenPixelRatio,
+                    screenDPI,
+                    screenColorDepth,
+                    screenOrientation,
+                    screenRotation,
+                    os,
+                    availableBrowserMemory,
+                    cpuThreads,
+                    gpuVendor,
+                    gpuInfo,
+                    deviceMemory,
+                    systemLanguages
+                } = await fetchInfo();
+
+                if (myIPData && ipData) {
+                    infoContainer.innerHTML = `
+                        <p><strong>Your IP Address:</strong> ${myIPData.YourFuckingIPAddress}</p>
+                        <p><strong>Hostname:</strong> ${myIPData.YourFuckingHostname}</p>
+                        <p><strong>ISP:</strong> ${myIPData.YourFuckingISP}</p>
+                        <p><strong>Country:</strong> ${ipData.country}</p>
+                        <p><strong>Region:</strong> ${ipData.regionName}</p>
+                        <p><strong>City:</strong> ${ipData.city}</p>
+                        <p><strong>Latitude:</strong> ${ipData.lat}</p>
+                        <p><strong>Longitude:</strong> ${ipData.lon}</p>
+                        <p><strong>ZIP Code:</strong> ${ipData.zip}</p>
+                        <p><strong>Timezone:</strong> ${ipData.timezone}</p>
+                        <hr>
+                        <p><strong>User Agent:</strong> ${userAgent}</p>
+                        <p><strong>Connection Method:</strong> ${connectionMethod}</p>
+                        <p><strong>Request URL:</strong> ${requestURL}</p>
+                        <p><strong>Request Path:</strong> ${requestPath}</p>
+                        <p><strong>Request Protocol:</strong> ${requestProtocol}</p>
+                        <p><strong>Secure Connection:</strong> ${secureConnection}</p>
+                        <p><strong>Proxy IPs:</strong> ${proxyIPs.join(', ')}</p>
+                        <p><strong>Window Properties:</strong> ${windowProperties}</p>
+                        <p><strong>Window Width:</strong> ${windowWidth}</p>
+                        <p><strong>Window Height:</strong> ${windowHeight}</p>
+                        <p><strong>Window Ratio:</strong> ${windowRatio}</p>
+                        <p><strong>Screen Width:</strong> ${screenWidth}</p>
+                        <p><strong>Screen Height:</strong> ${screenHeight}</p>
+                        <p><strong>Screen Ratio:</strong> ${screenRatio}</p>
+                        <p><strong>Screen Pixel Ratio:</strong> ${screenPixelRatio}</p>
+                        <p><strong>Screen DPI:</strong> ${screenDPI}</p>
+                        <p><strong>Screen Color Depth:</strong> ${screenColorDepth}</p>
+                        <p><strong>Screen Orientation:</strong> ${screenOrientation}</p>
+                        <p><strong>Screen Rotation:</strong> ${screenRotation}</p>
+                        <p><strong>OS:</strong> ${os}</p>
+                        <p><strong>Available Browser Memory:</strong> ${availableBrowserMemory}</p>
+                        <p><strong>CPU Threads:</strong> ${cpuThreads}</p>
+                        <p><strong>GPU Vendor:</strong> ${gpuVendor}</p>
+                        <p><strong>GPU Info:</strong> ${gpuInfo}</p>
+                        <p><strong>Device Memory:</strong> ${deviceMemory}</p>
+                        <p><strong>System Languages:</strong> ${systemLanguages}</p>
+                    `;
+                } else {
+                    infoContainer.innerHTML = '<p>Failed to fetch information</p>';
+                }
+            } catch (error) {
+                console.error("Error displaying information:", error);
+                infoContainer.innerHTML = '<p>Error fetching information</p>';
+            }
+        }
+
+        document.getElementById('show-button').addEventListener('click', displayInfo);
+    </script>
+</body>
+</html>
