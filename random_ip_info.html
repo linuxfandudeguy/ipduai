@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random IP Information - IPDUAI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #info {
+            margin-top: 20px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Random IP Information</h1>
+        <p>This page generates a random IP address and checks if it's real. If it's real, it displays its information.</p>
+        <button id="generate-ip">Generate Random IP</button>
+        <div id="info"></div>
+        <!-- Add link to go back to main page -->
+        <div>
+            <a href="index.html">Go back to main page</a>
+        </div>
+    </div>
+
+    <script>
+        // Function to generate a random IP address
+        function generateRandomIP() {
+            const ipParts = Array.from({length: 4}, () => Math.floor(Math.random() * 256));
+            return ipParts.join('.');
+        }
+
+        // Function to check if the provided IP address is real
+        async function checkIfRealIP(ipAddress) {
+            try {
+                let response = await fetch(`https://uncors.vercel.app/?url=http://ip-api.com/json/${ipAddress}`);
+                return response.ok;
+            } catch (error) {
+                console.error("Error checking IP validity:", error);
+                return false;
+            }
+        }
+
+        // Function to fetch and display IP information
+        async function displayRandomIPInfo() {
+            const randomIP = generateRandomIP();
+            const infoContainer = document.getElementById('info');
+            infoContainer.innerHTML = '<p>Checking...</p>';
+
+            try {
+                const isRealIP = await checkIfRealIP(randomIP);
+                if (isRealIP) {
+                    const ipDataResponse = await fetch(`https://uncors.vercel.app/?url=http://ip-api.com/json/${randomIP}`);
+                    const ipData = await ipDataResponse.json();
+                    infoContainer.innerHTML = `
+                        <p><strong>Random IP Address:</strong> ${ipData.query}</p>
+                        <p><strong>Country:</strong> ${ipData.country}</p>
+                        <p><strong>Region:</strong> ${ipData.regionName}</p>
+                        <p><strong>City:</strong> ${ipData.city}</p>
+                        <p><strong>Latitude:</strong> ${ipData.lat}</p>
+                        <p><strong>Longitude:</strong> ${ipData.lon}</p>
+                        <p><strong>ZIP Code:</strong> ${ipData.zip}</p>
+                        <p><strong>Timezone:</strong> ${ipData.timezone}</p>
+                        <p><strong>ISP:</strong> ${ipData.isp}</p>
+                    `;
+                } else {
+                    infoContainer.innerHTML = '<p>Not a real IP address.</p>';
+                }
+            } catch (error) {
+                console.error("Error displaying IP information:", error);
+                infoContainer.innerHTML = '<p>Error fetching IP information</p>';
+            }
+        }
+
+        document.getElementById('generate-ip').addEventListener('click', displayRandomIPInfo);
+    </script>
+</body>
+</html>
