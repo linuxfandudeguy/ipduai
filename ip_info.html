@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Information - IPDUAI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 90px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #info {
+            margin-top: 20px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IP Information</h1>
+        <p>This page shows information based on the provided IP address.</p>
+        <!-- Add IP address input field and button for fetching information -->
+        <input type="text" id="ip-address" placeholder="Enter IP address">
+        <button id="show-info">Show Information</button>
+        <div id="info"></div>
+    </div>
+
+    <script>
+        // Function to fetch IP information based on the provided IP address
+        async function fetchIPInfo(ipAddress) {
+            try {
+                let ipDataResponse = await fetch(`https://uncors.vercel.app/?url=http://ip-api.com/json/${ipAddress}`);
+                if (!ipDataResponse.ok) {
+                    throw new Error("Failed to fetch IP data");
+                }
+                let ipData = await ipDataResponse.json();
+                return ipData;
+            } catch (error) {
+                console.error("Error fetching IP information:", error);
+                return null;
+            }
+        }
+
+        // Function to display IP information
+        async function displayIPInfo() {
+            const ipAddress = document.getElementById('ip-address').value;
+            const infoContainer = document.getElementById('info');
+            infoContainer.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const ipData = await fetchIPInfo(ipAddress);
+                if (ipData) {
+                    infoContainer.innerHTML = `
+                        <p><strong>IP Address:</strong> ${ipData.query}</p>
+                        <p><strong>Country:</strong> ${ipData.country}</p>
+                        <p><strong>Region:</strong> ${ipData.regionName}</p>
+                        <p><strong>City:</strong> ${ipData.city}</p>
+                        <p><strong>Latitude:</strong> ${ipData.lat}</p>
+                        <p><strong>Longitude:</strong> ${ipData.lon}</p>
+                        <p><strong>ZIP Code:</strong> ${ipData.zip}</p>
+                        <p><strong>Timezone:</strong> ${ipData.timezone}</p>
+                        <p><strong>ISP:</strong> ${ipData.isp}</p>
+                    `;
+                } else {
+                    infoContainer.innerHTML = '<p>Failed to fetch IP information</p>';
+                }
+            } catch (error) {
+                console.error("Error displaying IP information:", error);
+                infoContainer.innerHTML = '<p>Error fetching IP information</p>';
+            }
+        }
+
+        document.getElementById('show-info').addEventListener('click', displayIPInfo);
+    </script>
+</body>
+</html>
